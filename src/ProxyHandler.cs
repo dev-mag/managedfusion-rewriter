@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Web;
 
@@ -197,6 +198,12 @@ namespace ManagedFusion.Rewriter
 			 * End - Add Proxy Standard Protocol Headers
 			 */
 
+		    var hostHeader = context.Request.Headers.AllKeys.Contains("Host") ? context.Request.Headers.Get("Host") : string.Empty;
+		    if (!string.IsNullOrEmpty(hostHeader))
+		    {
+                request.Headers.Add("Host", hostHeader);
+		    }
+
 			OnRequestToTarget(context, request);
 
 			// ContentLength is set to -1 if their is no data to send
@@ -281,8 +288,7 @@ namespace ManagedFusion.Rewriter
 				// don't check for restricted response headers because HttpContext doesn't seem to care
 				if (name == "Server" ||
 					name == "X-Powered-By" ||
-					name == "Date" ||
-					name == "Host")
+					name == "Date")
 					continue;
 
 				string[] values = response.Headers.GetValues(i);
