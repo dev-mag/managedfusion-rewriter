@@ -96,7 +96,7 @@ namespace ManagedFusion.Rewriter
 				var httpRequest = request as HttpWebRequest;
 				httpRequest.AllowAutoRedirect = false;
 				httpRequest.ServicePoint.Expect100Continue = false;
-
+			    httpRequest.Host = RequestUrl.Host;
 				// add all the headers from the other proxied session to this request
 				foreach (string name in context.Request.Headers.AllKeys)
 				{
@@ -197,12 +197,6 @@ namespace ManagedFusion.Rewriter
 			/*
 			 * End - Add Proxy Standard Protocol Headers
 			 */
-
-		    var hostHeader = context.Request.Headers.AllKeys.Contains("Host") ? context.Request.Headers.Get("Host") : string.Empty;
-		    if (!string.IsNullOrEmpty(hostHeader))
-		    {
-                request.Headers.Add("Host", hostHeader);
-		    }
 
 			OnRequestToTarget(context, request);
 

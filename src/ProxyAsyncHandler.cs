@@ -115,6 +115,9 @@ namespace ManagedFusion.Rewriter
 		private async Task<HttpRequestMessage> GetRequestFromClient(HttpContext context)
 		{
 			var request = new HttpRequestMessage(new HttpMethod(context.Request.HttpMethod), RequestUrl);
+			    httpRequest.Host = RequestUrl.Host;
+            
+
 			var content = new StreamContent(context.Request.InputStream, Manager.Configuration.Rewriter.Proxy.BufferSize);
 
 			var knownVerb = KnownHttpVerb.Parse(request.Method.Method);
@@ -159,12 +162,6 @@ namespace ManagedFusion.Rewriter
 			/*
 			 * End - Add Proxy Standard Protocol Headers
 			 */
-
-            var hostHeader = context.Request.Headers.AllKeys.Contains("Host") ? context.Request.Headers.Get("Host") : string.Empty;
-		    if (!string.IsNullOrEmpty(hostHeader))
-		    {
-                request.Headers.Add("Host", hostHeader);
-		    }
 
 			await OnRequestToTarget(context, request);
 
