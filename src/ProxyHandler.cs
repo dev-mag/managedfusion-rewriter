@@ -96,7 +96,7 @@ namespace ManagedFusion.Rewriter
 				var httpRequest = request as HttpWebRequest;
 				httpRequest.AllowAutoRedirect = false;
 				httpRequest.ServicePoint.Expect100Continue = false;
-			    httpRequest.Host = RequestUrl.Host;
+                httpRequest.Host = ResponseUrl.Host;
 				// add all the headers from the other proxied session to this request
 				foreach (string name in context.Request.Headers.AllKeys)
 				{
@@ -198,6 +198,8 @@ namespace ManagedFusion.Rewriter
 			 * End - Add Proxy Standard Protocol Headers
 			 */
 
+            request.Headers.Add("Host", context.Request.Headers.Get("host"));
+
 			OnRequestToTarget(context, request);
 
 			// ContentLength is set to -1 if their is no data to send
@@ -266,6 +268,8 @@ namespace ManagedFusion.Rewriter
 		/// <param name="response">The response.</param>
 		private void SendResponseToClient(HttpContext context, WebResponse response)
 		{
+            var hostHeader = context.Request.Headers.Get("Host"); 
+
 			context.Response.ClearHeaders();
 			context.Response.ClearContent();
 
@@ -364,6 +368,8 @@ namespace ManagedFusion.Rewriter
 				foreach (string value in values)
 					context.Response.AppendHeader(name, value);
 			}
+
+            context.Response.AppendHeader("Host", hostHeader);
 
 			Manager.Log(String.Format("Response is {0}being buffered", (context.Response.BufferOutput ? "" : "not ")), "Proxy");
 

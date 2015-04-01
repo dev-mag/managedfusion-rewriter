@@ -9,12 +9,12 @@ namespace ManagedFusion.Rewriter.Tests
 {
 	public class TestProxyAsyncHandler : ProxyAsyncHandler
 	{
-		protected override void OnRequestToTarget(HttpContext context, WebRequest request)
-		{
-		}
+        //protected override void OnRequestToTarget(HttpContext context, WebRequest request)
+        //{
+        //}
 
-		protected override void OnResponseToClient(HttpContext context, WebResponse response)
-		{
-		}
+        //protected override void OnResponseToClient(HttpContext context, WebResponse response)
+        //{
+        //}
 	}
 }
