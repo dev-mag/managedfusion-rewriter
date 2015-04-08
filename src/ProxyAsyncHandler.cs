@@ -105,6 +105,12 @@ namespace ManagedFusion.Rewriter
 
             var knownVerb = KnownHttpVerb.Parse(request.Method.Method);
 
+            foreach (var name in context.Request.Headers.AllKeys)
+            {
+                var values = context.Request.Headers.GetValues(name);
+                request.Headers.TryAddWithoutValidation(name, values);
+            }
+
             // add the vanity url to the header
             if (Manager.Configuration.Rewriter.AllowVanityHeader)
             {
@@ -135,8 +141,6 @@ namespace ManagedFusion.Rewriter
              * End - Add Proxy Standard Protocol Headers
              */
 
-            request.Headers.Add("Host", context.Request.Headers.Get("host"));
-
             await OnRequestToTarget(context, request);
 
             // ContentLength is set to -1 if their is no data to send
@@ -155,7 +159,7 @@ namespace ManagedFusion.Rewriter
         /// <param name="response">The response.</param>
         private async Task SendResponseToClient(HttpContext context, HttpResponseMessage response)
         {
-            var hostHeader = context.Request.Headers.Get("Host"); 
+            var hostHeader = context.Request.Headers.Get("Host");
 
             context.Response.ClearHeaders();
             context.Response.ClearContent();
@@ -266,6 +270,12 @@ namespace ManagedFusion.Rewriter
 
             // set all HTTP specific protocol stuff
             context.Response.StatusCode = (int)response.StatusCode;
+
+            // for not-modified responses the content type will not be returned so don't try and set it.
+            if (response.Content.Headers.ContentType != null)
+            {
+                context.Response.ContentType = response.Content.Headers.ContentType.MediaType;
+            }
 
             Manager.Log(String.Format("Responding '{0}'", ((int)response.StatusCode)), "Proxy");
 
