@@ -24,7 +24,6 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -70,7 +69,10 @@ namespace ManagedFusion.Rewriter
         {
             Manager.Log("**********************************************************************************");
 
-            var client = new HttpClient();
+            var client = new HttpClient(new HttpClientHandler
+            {
+                AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
+            });
             var request = await GetRequestFromClient(context);
 
             // send the request to the target
