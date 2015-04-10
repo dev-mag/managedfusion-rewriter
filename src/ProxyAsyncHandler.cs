@@ -21,9 +21,11 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -71,7 +73,8 @@ namespace ManagedFusion.Rewriter
 
             var client = new HttpClient(new HttpClientHandler
             {
-                AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
+                AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip,
+                AllowAutoRedirect = false
             });
             var request = await GetRequestFromClient(context);
 
@@ -113,6 +116,22 @@ namespace ManagedFusion.Rewriter
                 request.Headers.TryAddWithoutValidation(name, values);
             }
 
+            // send url encoded form if we have one
+            if (context.Request.Form.Count > 0)
+            {
+                var formValues = new List<KeyValuePair<string, string>>();
+
+                foreach (var key in context.Request.Form.AllKeys)
+                {
+                    var strings = context.Request.Form.GetValues(key);
+                    if (strings == null || strings.Length != 1)
+                        continue;
+                    formValues.Add(new KeyValuePair<string, string>(key, strings[0]));
+                }
+
+                request.Content = new FormUrlEncodedContent(formValues);
+            }
+
             // add the vanity url to the header
             if (Manager.Configuration.Rewriter.AllowVanityHeader)
             {
@@ -144,12 +163,6 @@ namespace ManagedFusion.Rewriter
              */
 
             await OnRequestToTarget(context, request);
-
-            // ContentLength is set to -1 if their is no data to send
-            if (!knownVerb.ContentBodyNotAllowed)
-            {
-                request.Content = content;
-            }
 
             return request;
         }
