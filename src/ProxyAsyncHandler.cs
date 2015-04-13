@@ -25,7 +25,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -74,7 +73,8 @@ namespace ManagedFusion.Rewriter
             var client = new HttpClient(new HttpClientHandler
             {
                 AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip,
-                AllowAutoRedirect = false
+                AllowAutoRedirect = false,
+                UseCookies = false // allows us to set the Cookie header
             });
             var request = await GetRequestFromClient(context);
 
